@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #FAF8F5;
+  --foreground: #1A2E22;
+  --primary: #15803D;
+  --primary-foreground: #FFFFFF;
+  --secondary: #C25E34;
+  --muted: #EFE9E0;
+  --muted-foreground: #6B7280;
+  --card: #FFFFFF;
+  --card-foreground: #1A2E22;
+}
+
+@layer base {
+  * {
+    border-color: #E5DED5;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-tap-highlight-color: transparent;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+}
+
+/* Optimisation tactile pour usage sur smartphone au champ */
+.touch-btn {
+  @apply min-h-[44px] touch-manipulation select-none active:scale-[0.98] transition-transform duration-75;
+}
+
+/* Scrollbar personnalisée élégante */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F4EFEA;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D5C7B8;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #B8A38E;
+}
