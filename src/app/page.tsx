@@ -509,7 +509,7 @@ export default function AppLayout() {
         name: activity.name,
         domain: activity.domain,
         isPieceRate: activity.isPieceRate,
-        unitName: activity.unitName,
+        unitName: activity.unitName || "Jour",
         defaultUnitRate: activity.defaultUnitRate,
         isActive: activity.isActive,
       });
