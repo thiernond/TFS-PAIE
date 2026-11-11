@@ -126,7 +126,7 @@ export default function AppLayout() {
               if (typeof window !== "undefined") {
                 try {
                   localStorage.setItem("tfs_paie_workers", JSON.stringify(merged));
-                } catch (e) {}
+                } catch (e) { }
               }
               return merged;
             });
@@ -274,7 +274,7 @@ export default function AppLayout() {
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem("tfs_paie_payments", JSON.stringify(next));
-        } catch (e) {}
+        } catch (e) { }
       }
       return next;
     });
@@ -289,7 +289,7 @@ export default function AppLayout() {
         if (typeof window !== "undefined") {
           try {
             localStorage.setItem("tfs_paie_workers", JSON.stringify(next));
-          } catch (e) {}
+          } catch (e) { }
         }
         return next;
       });
@@ -334,7 +334,7 @@ export default function AppLayout() {
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem("tfs_paie_payments", JSON.stringify(next));
-        } catch (e) {}
+        } catch (e) { }
       }
       return next;
     });
@@ -362,7 +362,7 @@ export default function AppLayout() {
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem("tfs_paie_workers", JSON.stringify(next));
-        } catch (e) {}
+        } catch (e) { }
       }
       return next;
     });
@@ -419,7 +419,7 @@ export default function AppLayout() {
           if (typeof window !== "undefined") {
             try {
               localStorage.setItem("tfs_paie_workers", JSON.stringify(next));
-            } catch (e) {}
+            } catch (e) { }
           }
           return next;
         });
@@ -439,7 +439,7 @@ export default function AppLayout() {
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem("tfs_paie_workers", JSON.stringify(next));
-        } catch (e) {}
+        } catch (e) { }
       }
       return next;
     });
@@ -460,7 +460,7 @@ export default function AppLayout() {
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem("tfs_paie_workers", JSON.stringify(next));
-        } catch (e) {}
+        } catch (e) { }
       }
       return next;
     });
@@ -493,7 +493,7 @@ export default function AppLayout() {
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem("tfs_paie_activities", JSON.stringify(next));
-        } catch (e) {}
+        } catch (e) { }
       }
       showToast(
         exists
@@ -522,7 +522,7 @@ export default function AppLayout() {
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem("tfs_paie_activities", JSON.stringify(next));
-        } catch (e) {}
+        } catch (e) { }
       }
       return next;
     });
@@ -543,7 +543,7 @@ export default function AppLayout() {
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem("tfs_paie_farm_domains", JSON.stringify(next));
-        } catch (e) {}
+        } catch (e) { }
       }
       showToast(
         exists
@@ -572,7 +572,7 @@ export default function AppLayout() {
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem("tfs_paie_farm_domains", JSON.stringify(next));
-        } catch (e) {}
+        } catch (e) { }
       }
       return next;
     });
@@ -590,7 +590,7 @@ export default function AppLayout() {
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem("tfs_paie_app_users", JSON.stringify(next));
-        } catch (e) {}
+        } catch (e) { }
       }
       return next;
     });
@@ -603,7 +603,7 @@ export default function AppLayout() {
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem("tfs_paie_app_users", JSON.stringify(next));
-        } catch (e) {}
+        } catch (e) { }
       }
       return next;
     });
@@ -617,7 +617,7 @@ export default function AppLayout() {
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem("tfs_paie_app_users", JSON.stringify(next));
-        } catch (e) {}
+        } catch (e) { }
       }
       return next;
     });
@@ -668,7 +668,7 @@ export default function AppLayout() {
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem("tfs_paie_workers", JSON.stringify(next));
-        } catch (e) {}
+        } catch (e) { }
       }
       return next;
     });
@@ -707,15 +707,15 @@ export default function AppLayout() {
       const next = prev.map((w) =>
         w.id === workerId
           ? {
-              ...w,
-              unpaidAdvances: Math.max(0, (w.unpaidAdvances || 0) - amountToSettle),
-            }
+            ...w,
+            unpaidAdvances: Math.max(0, (w.unpaidAdvances || 0) - amountToSettle),
+          }
           : w
       );
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem("tfs_paie_workers", JSON.stringify(next));
-        } catch (e) {}
+        } catch (e) { }
       }
       return next;
     });

@@ -537,6 +537,6 @@ export const mockCompanySettings: CompanySettings = {
   standardDailyRate: 2500,
   payrollCycle: "quinzaine",
   activeOperators: ["wave", "orange_money", "mtn_momo", "cash"],
-  logoUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23103423'/><circle cx='50' cy='50' r='38' stroke='%23E2B855' stroke-width='2' stroke-dasharray='4 2'/><path d='M50 20C42 32 35 48 35 60C35 68.28 41.71 75 50 75C58.28 75 65 68.28 65 60C65 48 58 32 50 20Z' fill='%232ECC71'/><path d='M50 28V72' stroke='%230E291C' stroke-width='2'/><circle cx='50' cy='24' r='3' fill='%23E2B855'/></svg>",
+  logoUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23103423'/><circle cx='50' cy='50' r='38' stroke='%23E2B855' stroke-width='2' stroke-dasharray='4 2'/><path d='M50 20C42 32 35 48 35 60C35 68.28 41.71 75 50 75C58.28 75 65 68.28 65 60C65 48 58 32 50 20Z' fill='%232ECC71'/><path d='M50 28V72' stroke='%230E291C' stroke-width='2'/><circle cx='50' cy='24' r='3' fill='%23E2B855'/></svg>",
 };
 

@@ -120,6 +120,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <img
                   src={companySettings.logoUrl}
                   alt={companySettings.companyName}
+                  width={36}
+                  height={36}
                   className="w-full h-full object-contain"
                 />
               </div>

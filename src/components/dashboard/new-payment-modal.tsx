@@ -19,6 +19,7 @@ interface NewPaymentModalProps {
   onClose: () => void;
   workers: Worker[];
   onAddPayment: (payment: DailyPaymentRecord) => void;
+  initialPayment?: DailyPaymentRecord | null;
 }
 
 export const NewPaymentModal: React.FC<NewPaymentModalProps> = ({
@@ -26,6 +27,7 @@ export const NewPaymentModal: React.FC<NewPaymentModalProps> = ({
   onClose,
   workers,
   onAddPayment,
+  initialPayment,
 }) => {
   const bounds = getCurrentMonthBounds();
   const todayStr = getTodayISO();
@@ -44,6 +46,32 @@ export const NewPaymentModal: React.FC<NewPaymentModalProps> = ({
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("wave");
   const [transactionRef, setTransactionRef] = useState(`WAV-${Math.floor(1000000 + Math.random() * 9000000)}`);
   const [paymentDate, setPaymentDate] = useState(todayStr);
+
+  React.useEffect(() => {
+    if (initialPayment) {
+      setSelectedWorkerId(initialPayment.workerId);
+      setPaymentType(initialPayment.type || "payroll_settlement");
+      setPeriodPreset("custom");
+      setPeriodStart(initialPayment.periodStart || bounds.q1Start);
+      setPeriodEnd(initialPayment.periodEnd || bounds.q1End);
+      setDaysWorked(String(initialPayment.daysWorked || 14));
+      setDailyRate(String(initialPayment.dailyRate || 2500));
+      setPaymentMethod(initialPayment.paymentMethod || "wave");
+      setTransactionRef(initialPayment.transactionRef || "");
+      setPaymentDate(initialPayment.date || todayStr);
+    } else if (isOpen) {
+      setSelectedWorkerId(workers[0]?.id || "");
+      setPaymentType("payroll_settlement");
+      setPeriodPreset("q1");
+      setPeriodStart(bounds.q1Start);
+      setPeriodEnd(bounds.q1End);
+      setDaysWorked("14");
+      setDailyRate(String(workers[0]?.dailyRate || 2500));
+      setPaymentMethod(workers[0]?.momoOperator || "wave");
+      setTransactionRef(`WAV-${Math.floor(1000000 + Math.random() * 9000000)}`);
+      setPaymentDate(todayStr);
+    }
+  }, [initialPayment, isOpen, workers, bounds.q1Start, bounds.q1End, todayStr]);
 
   if (!isOpen) return null;
 
@@ -99,7 +127,7 @@ export const NewPaymentModal: React.FC<NewPaymentModalProps> = ({
     if (!currentWorker) return;
 
     const newRecord: DailyPaymentRecord = {
-      id: `PAY-Q-${Date.now().toString().slice(-6)}`,
+      id: initialPayment ? initialPayment.id : `PAY-Q-${Date.now().toString().slice(-6)}`,
       workerId: currentWorker.id,
       workerName: `${currentWorker.firstName} ${currentWorker.lastName}`,
       functionTitle: currentWorker.functionTitle,
@@ -134,7 +162,7 @@ export const NewPaymentModal: React.FC<NewPaymentModalProps> = ({
             </div>
             <div>
               <h3 className="font-extrabold text-sm sm:text-base text-slate-900 leading-tight">
-                Règlement de Quinzaine (15 jours)
+                {initialPayment ? `Modifier le Règlement (${initialPayment.id})` : "Règlement de Quinzaine (15 jours)"}
               </h3>
               <p className="text-[11px] text-slate-500">
                 Taux standard 2 500 FCFA/j • Déduction automatique des avances

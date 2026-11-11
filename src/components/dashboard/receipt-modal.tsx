@@ -72,6 +72,8 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ payment, onClose, co
                 <img
                   src={companySettings.logoUrl}
                   alt={companySettings.companyName}
+                  width={40}
+                  height={40}
                   className="w-full h-full object-contain"
                 />
               </div>

@@ -58,6 +58,8 @@ export const FarmBanner: React.FC<FarmBannerProps> = ({
                 <img
                   src={companySettings.logoUrl}
                   alt={companySettings.companyName}
+                  width={48}
+                  height={48}
                   className="w-full h-full object-contain"
                 />
               </div>
