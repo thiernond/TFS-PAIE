@@ -45,6 +45,7 @@ import {
 import {
   fetchFarmInitialData,
   createWorkerAction,
+  updateWorkerAction,
   importWorkersBatchAction,
   deleteWorkerAction,
   saveAttendanceBatchAction,
@@ -230,6 +231,7 @@ export default function AppLayout() {
   // Modales
   const [isNewPaymentOpen, setIsNewPaymentOpen] = useState(false);
   const [isNewWorkerOpen, setIsNewWorkerOpen] = useState(false);
+  const [editingWorker, setEditingWorker] = useState<Worker | null>(null);
   const [isImportWorkersOpen, setIsImportWorkersOpen] = useState(false);
   const [isActivitiesOpen, setIsActivitiesOpen] = useState(false);
   const [isQuickAttendanceOpen, setIsQuickAttendanceOpen] = useState(false);
@@ -351,8 +353,12 @@ export default function AppLayout() {
 
   // Actions Journaliers (Connecté à Supabase + Cache Local)
   const handleAddWorker = async (newWorker: Worker) => {
+    const isExisting = workers.some((w) => w.id === newWorker.id);
+
     setWorkers((prev) => {
-      const next = [newWorker, ...prev];
+      const next = isExisting
+        ? prev.map((w) => (w.id === newWorker.id ? newWorker : w))
+        : [newWorker, ...prev];
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem("tfs_paie_workers", JSON.stringify(next));
@@ -360,10 +366,32 @@ export default function AppLayout() {
       }
       return next;
     });
-    setKpis((prev) => ({
-      ...prev,
-      totalActiveWorkers: prev.totalActiveWorkers + 1,
-    }));
+
+    if (!isExisting) {
+      setKpis((prev) => ({
+        ...prev,
+        totalActiveWorkers: prev.totalActiveWorkers + 1,
+      }));
+    }
+
+    if (isExisting) {
+      showToast(`Fiche de ${newWorker.firstName} ${newWorker.lastName} mise à jour !`);
+      if (isSupabaseConnected && newWorker.id.includes("-")) {
+        await updateWorkerAction(newWorker.id, {
+          firstName: newWorker.firstName,
+          lastName: newWorker.lastName,
+          phone: newWorker.phone,
+          teamId: newWorker.teamId,
+          functionTitle: newWorker.functionTitle,
+          domain: newWorker.domain,
+          momoOperator: newWorker.momoOperator,
+          momoNumber: newWorker.momoNumber,
+          dailyRate: newWorker.dailyRate,
+          hiredAt: newWorker.hiredAt,
+        });
+      }
+      return;
+    }
 
     if (!isSupabaseConnected) {
       showToast(`Journalier ${newWorker.firstName} ${newWorker.lastName} enregistré dans le registre !`);
@@ -949,12 +977,15 @@ export default function AppLayout() {
             <WorkersView
               workers={workers}
               teams={mockTeams}
-              onOpenNewWorker={() => setIsNewWorkerOpen(true)}
+              onOpenNewWorker={() => {
+                setEditingWorker(null);
+                setIsNewWorkerOpen(true);
+              }}
               onOpenImport={() => setIsImportWorkersOpen(true)}
               onExportWorkers={handleExportWorkers}
               onDeleteWorker={handleDeleteWorker}
               onEditWorker={(w) => {
-                showToast(`Édition de la fiche de ${w.firstName} ${w.lastName}`);
+                setEditingWorker(w);
                 setIsNewWorkerOpen(true);
               }}
             />
@@ -1124,10 +1155,14 @@ export default function AppLayout() {
 
       <NewWorkerModal
         isOpen={isNewWorkerOpen}
-        onClose={() => setIsNewWorkerOpen(false)}
+        onClose={() => {
+          setIsNewWorkerOpen(false);
+          setEditingWorker(null);
+        }}
         teams={mockTeams}
         activities={activities}
         onAddWorker={handleAddWorker}
+        initialWorker={editingWorker}
       />
 
       <ActivityModal

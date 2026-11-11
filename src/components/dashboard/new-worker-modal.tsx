@@ -85,20 +85,20 @@ export const NewWorkerModal: React.FC<NewWorkerModalProps> = ({
     const team = teams.find((t) => t.id === teamId);
 
     const newWorker: Worker = {
-      id: `w-${Date.now().toString().slice(-4)}`,
+      id: initialWorker ? initialWorker.id : `w-${Date.now().toString().slice(-4)}`,
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       phone: phone.trim() || "+221 ",
-      teamId: team?.id || "team-1",
-      teamName: team?.name || "Équipe Maraîchage",
+      teamId: team?.id || initialWorker?.teamId || "team-1",
+      teamName: team?.name || initialWorker?.teamName || "Équipe Maraîchage",
       functionTitle: functionTitle.trim() || "Journalier Polyvalent",
       domain,
       momoOperator,
       momoNumber: momoNumber.trim() || phone.trim(),
       dailyRate: parseInt(dailyRate, 10) || 2500,
-      status: "active",
-      hiredAt: new Date().toISOString().split("T")[0],
-      unpaidAdvances: 0,
+      status: initialWorker?.status || "active",
+      hiredAt: initialWorker?.hiredAt || new Date().toISOString().split("T")[0],
+      unpaidAdvances: initialWorker?.unpaidAdvances || 0,
     };
 
     onAddWorker(newWorker);
@@ -115,10 +115,12 @@ export const NewWorkerModal: React.FC<NewWorkerModalProps> = ({
             </div>
             <div>
               <h3 className="font-extrabold text-base text-slate-900">
-                Nouveau Journalier Agricole
+                {initialWorker ? "Modifier la Fiche Journalier" : "Nouveau Journalier Agricole"}
               </h3>
               <p className="text-xs text-slate-500">
-                Enregistrement de la fiche avec fonction et domaine
+                {initialWorker
+                  ? `Mise à jour de ${initialWorker.firstName} ${initialWorker.lastName}`
+                  : "Enregistrement de la fiche avec fonction et domaine"}
               </p>
             </div>
           </div>
@@ -286,7 +288,7 @@ export const NewWorkerModal: React.FC<NewWorkerModalProps> = ({
               className="px-5 py-2 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs shadow-md transition-transform active:scale-95 flex items-center gap-1.5"
             >
               <Check className="w-4 h-4" />
-              <span>Créer la Fiche Journalier</span>
+              <span>{initialWorker ? "Enregistrer les Modifications" : "Créer la Fiche Journalier"}</span>
             </button>
           </div>
         </form>
