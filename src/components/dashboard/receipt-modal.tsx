@@ -21,7 +21,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ payment, onClose, co
     ? `Quinzaine du ${formatDateFR(payment.periodStart)} au ${formatDateFR(payment.periodEnd)}`
     : `Journée du ${formatDateFR(payment.date)}`;
 
-  const companyName = companySettings?.companyName || "Domaine Agricole des Niayes";
+  const companyName = companySettings?.companyName || "TERANGA FARMER SERVICE";
   const registration = companySettings?.registrationNumber ? ` (NINEA: ${companySettings.registrationNumber})` : "";
 
   const handleShareWhatsApp = () => {
@@ -83,7 +83,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({ payment, onClose, co
               </div>
             )}
             <h4 className="font-extrabold text-sm text-slate-900 tracking-wide uppercase">
-              {companySettings?.companyName || "DOMAINE AGRICOLE DES NIAYES"}
+              {companySettings?.companyName || "TERANGA FARMER SERVICE"}
             </h4>
             <p className="text-[11px] text-slate-600">
               {companySettings?.address || "Route Nationale 2"} • {companySettings?.region || "Thiès"}

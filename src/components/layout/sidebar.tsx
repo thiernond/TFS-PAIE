@@ -135,7 +135,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 TFS PAIE
               </span>
               <p className="text-[11px] text-emerald-200/70 font-medium truncate max-w-[150px]">
-                {companySettings?.companyName || "Domaine des Niayes"}
+                {companySettings?.companyName || "TERANGA FARMER SERVICE"}
               </p>
             </div>
           </div>

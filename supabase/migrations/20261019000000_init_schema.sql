@@ -465,7 +465,7 @@ BEGIN
         standard_daily_rate, payroll_cycle
     ) VALUES (
         'a0000000-0000-0000-0000-000000000001',
-        'Domaine Agricole des Niayes',
+        'TERANGA FARMER SERVICE',
         'Société Civile Agricole (SCA)',
         'SN-DKR-2024-B-8912',
         'El Hadj Diallo',

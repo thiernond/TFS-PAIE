@@ -524,7 +524,7 @@ export const mockUsers: AppUser[] = [
 ];
 
 export const mockCompanySettings: CompanySettings = {
-  companyName: "Domaine Agricole des Niayes",
+  companyName: "TERANGA FARMER SERVICE",
   legalForm: "Société Civile Agricole (SCA)",
   registrationNumber: "SN-DKR-2024-B-8912",
   managerName: "El Hadj Diallo",
@@ -532,7 +532,7 @@ export const mockCompanySettings: CompanySettings = {
   region: "Thiès / Niayes",
   address: "Route Nationale 2, Km 45",
   phone: "+221 77 452 10 99",
-  email: "direction@domaineniayes.sn",
+  email: "direction@terangafarmerservice.sn",
   currency: "Franc CFA (XOF)",
   standardDailyRate: 2500,
   payrollCycle: "quinzaine",

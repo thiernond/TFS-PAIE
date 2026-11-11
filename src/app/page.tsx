@@ -152,11 +152,11 @@ export default function AppLayout() {
             setCompanySettings(result.companySettings);
           }
         } else {
-          setIsSupabaseConnected(false);
+          setIsSupabaseConnected(typeof navigator !== "undefined" ? navigator.onLine : true);
         }
       } catch (err) {
         console.warn("Connexion initiale Supabase : utilisation du cache local", err);
-        if (isMounted) setIsSupabaseConnected(false);
+        if (isMounted) setIsSupabaseConnected(typeof navigator !== "undefined" ? navigator.onLine : true);
       } finally {
         if (isMounted) setIsSyncing(false);
       }
@@ -169,11 +169,19 @@ export default function AppLayout() {
         if (savedCompany) {
           const parsedCompany = JSON.parse(savedCompany);
           if (parsedCompany && parsedCompany.companyName) {
+            let needsSave = false;
+            if (parsedCompany.companyName === "Domaine Agricole des Niayes") {
+              parsedCompany.companyName = "TERANGA FARMER SERVICE";
+              needsSave = true;
+            }
             if (
               parsedCompany.logoUrl &&
               parsedCompany.logoUrl.includes("<svg xmlns='http://www.w3.org/2000/svg' viewBox=")
             ) {
               parsedCompany.logoUrl = mockCompanySettings.logoUrl;
+              needsSave = true;
+            }
+            if (needsSave) {
               localStorage.setItem("tfs_paie_company_settings", JSON.stringify(parsedCompany));
             }
             setCompanySettings(parsedCompany);
