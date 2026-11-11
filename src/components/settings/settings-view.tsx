@@ -35,11 +35,11 @@ import { formatFCFA } from "@/lib/utils/formatters";
 
 const PRESET_LOGOS = {
   maraichage:
-    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23103423'/><circle cx='50' cy='50' r='38' stroke='%23E2B855' stroke-width='2' stroke-dasharray='4 2'/><path d='M50 20C42 32 35 48 35 60C35 68.28 41.71 75 50 75C58.28 75 65 68.28 65 60C65 48 58 32 50 20Z' fill='%232ECC71'/><path d='M50 28V72' stroke='%230E291C' stroke-width='2'/><circle cx='50' cy='24' r='3' fill='%23E2B855'/></svg>",
+    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23103423'/><circle cx='50' cy='50' r='38' stroke='%23E2B855' stroke-width='2' stroke-dasharray='4 2'/><path d='M50 20C42 32 35 48 35 60C35 68.28 41.71 75 50 75C58.28 75 65 68.28 65 60C65 48 58 32 50 20Z' fill='%232ECC71'/><path d='M50 28V72' stroke='%230E291C' stroke-width='2'/><circle cx='50' cy='24' r='3' fill='%23E2B855'/></svg>",
   vergers:
-    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23C25E34'/><circle cx='50' cy='50' r='38' stroke='%23F6E05E' stroke-width='2'/><circle cx='50' cy='52' r='24' fill='%23F6AD55'/><path d='M50 24C50 24 53 32 50 36' stroke='%237B341E' stroke-width='3' stroke-linecap='round'/><path d='M50 28C56 26 62 30 60 34C54 34 50 28 50 28Z' fill='%2338A169'/></svg>",
+    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23C25E34'/><circle cx='50' cy='50' r='38' stroke='%23F6E05E' stroke-width='2'/><circle cx='50' cy='52' r='24' fill='%23F6AD55'/><path d='M50 24C50 24 53 32 50 36' stroke='%237B341E' stroke-width='3' stroke-linecap='round'/><path d='M50 28C56 26 62 30 60 34C54 34 50 28 50 28Z' fill='%2338A169'/></svg>",
   elevage:
-    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231E3A8A'/><circle cx='50' cy='50' r='38' stroke='%23FDE047' stroke-width='2'/><path d='M50 75V25M50 25C44 32 40 42 42 50M50 35C56 42 60 52 58 60M50 45C44 52 40 62 42 70' stroke='%23FACC15' stroke-width='3' stroke-linecap='round'/></svg>",
+    "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231E3A8A'/><circle cx='50' cy='50' r='38' stroke='%23FDE047' stroke-width='2'/><path d='M50 75V25M50 25C44 32 40 42 42 50M50 35C56 42 60 52 58 60M50 45C44 52 40 62 42 70' stroke='%23FACC15' stroke-width='3' stroke-linecap='round'/></svg>",
 };
 
 interface SettingsViewProps {
@@ -570,6 +570,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       <img
                         src={companyForm.logoUrl}
                         alt="Logo de l'entreprise"
+                        width={96}
+                        height={96}
                         className="max-w-full max-h-full object-contain drop-shadow-xs"
                       />
                     ) : (

@@ -168,7 +168,16 @@ export default function AppLayout() {
         const savedCompany = localStorage.getItem("tfs_paie_company_settings");
         if (savedCompany) {
           const parsedCompany = JSON.parse(savedCompany);
-          if (parsedCompany && parsedCompany.companyName) setCompanySettings(parsedCompany);
+          if (parsedCompany && parsedCompany.companyName) {
+            if (
+              parsedCompany.logoUrl &&
+              parsedCompany.logoUrl.includes("<svg xmlns='http://www.w3.org/2000/svg' viewBox=")
+            ) {
+              parsedCompany.logoUrl = mockCompanySettings.logoUrl;
+              localStorage.setItem("tfs_paie_company_settings", JSON.stringify(parsedCompany));
+            }
+            setCompanySettings(parsedCompany);
+          }
         }
 
         const savedUsers = localStorage.getItem("tfs_paie_app_users");
@@ -230,6 +239,7 @@ export default function AppLayout() {
 
   // Modales
   const [isNewPaymentOpen, setIsNewPaymentOpen] = useState(false);
+  const [editingPayment, setEditingPayment] = useState<DailyPaymentRecord | null>(null);
   const [isNewWorkerOpen, setIsNewWorkerOpen] = useState(false);
   const [editingWorker, setEditingWorker] = useState<Worker | null>(null);
   const [isImportWorkersOpen, setIsImportWorkersOpen] = useState(false);
@@ -269,8 +279,12 @@ export default function AppLayout() {
 
   // Actions Paiements (Connecté à Supabase + Cache Local)
   const handleAddPayment = async (newPayment: DailyPaymentRecord) => {
+    const isExisting = payments.some((p) => p.id === newPayment.id);
+
     setPayments((prev) => {
-      const next = [newPayment, ...prev];
+      const next = isExisting
+        ? prev.map((p) => (p.id === newPayment.id ? newPayment : p))
+        : [newPayment, ...prev];
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem("tfs_paie_payments", JSON.stringify(next));
@@ -278,6 +292,11 @@ export default function AppLayout() {
       }
       return next;
     });
+
+    if (isExisting) {
+      showToast(`Règlement de ${newPayment.workerName} (${formatFCFA(newPayment.amount)}) mis à jour !`);
+      return;
+    }
 
     if (newPayment.advanceDeducted && newPayment.advanceDeducted > 0) {
       setWorkers((prev) => {
@@ -940,7 +959,7 @@ export default function AppLayout() {
                   <PaymentsTable
                     payments={filteredPayments}
                     onEditPayment={(payment) => {
-                      showToast(`Édition du règlement de ${payment.workerName}`);
+                      setEditingPayment(payment);
                       setIsNewPaymentOpen(true);
                     }}
                     onDeletePayment={handleDeletePayment}
@@ -1118,7 +1137,7 @@ export default function AppLayout() {
               <PaymentsTable
                 payments={filteredPayments}
                 onEditPayment={(payment) => {
-                  showToast(`Édition du paiement ${payment.id}`);
+                  setEditingPayment(payment);
                   setIsNewPaymentOpen(true);
                 }}
                 onDeletePayment={handleDeletePayment}
@@ -1148,9 +1167,13 @@ export default function AppLayout() {
 
       <NewPaymentModal
         isOpen={isNewPaymentOpen}
-        onClose={() => setIsNewPaymentOpen(false)}
+        onClose={() => {
+          setIsNewPaymentOpen(false);
+          setEditingPayment(null);
+        }}
         workers={workers}
         onAddPayment={handleAddPayment}
+        initialPayment={editingPayment}
       />
 
       <NewWorkerModal
