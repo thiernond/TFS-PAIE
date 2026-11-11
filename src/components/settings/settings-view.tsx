@@ -73,6 +73,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         if (saved) {
           const parsed = JSON.parse(saved);
           if (parsed && typeof parsed === "object" && parsed.companyName) {
+            if (parsed.companyName === "Domaine Agricole des Niayes") {
+              parsed.companyName = "TERANGA FARMER SERVICE";
+            }
             return parsed;
           }
         }
