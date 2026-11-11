@@ -36,6 +36,24 @@ export const NewUserModal: React.FC<NewUserModalProps> = ({
   const [role, setRole] = useState<UserRole>(editingUser?.role || "supervisor");
   const [teamId, setTeamId] = useState(editingUser?.teamId || teams[0]?.id || "");
 
+  React.useEffect(() => {
+    if (editingUser) {
+      setFirstName(editingUser.firstName);
+      setLastName(editingUser.lastName);
+      setEmail(editingUser.email);
+      setPhone(editingUser.phone || "");
+      setRole(editingUser.role);
+      setTeamId(editingUser.teamId || teams[0]?.id || "");
+    } else if (isOpen) {
+      setFirstName("");
+      setLastName("");
+      setEmail("");
+      setPhone("");
+      setRole("supervisor");
+      setTeamId(teams[0]?.id || "");
+    }
+  }, [editingUser, isOpen, teams]);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {

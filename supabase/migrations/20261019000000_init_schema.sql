@@ -258,16 +258,16 @@ ALTER TABLE public.payslips ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 
--- Fonctions utilitaires d'authentification pour RLS
+-- Fonctions utilitaires d'authentification pour RLS (sécurisées contre le détournement de search_path)
 CREATE OR REPLACE FUNCTION public.current_user_farm_id()
 RETURNS UUID AS $$
   SELECT farm_id FROM public.profiles WHERE id = auth.uid();
-$$ LANGUAGE sql STABLE SECURITY DEFINER;
+$$ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public;
 
 CREATE OR REPLACE FUNCTION public.current_user_role()
 RETURNS TEXT AS $$
   SELECT role FROM public.profiles WHERE id = auth.uid();
-$$ LANGUAGE sql STABLE SECURITY DEFINER;
+$$ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public;
 
 -- POLITIQUES RLS : FARMS
 CREATE POLICY "farms_read_member" ON public.farms

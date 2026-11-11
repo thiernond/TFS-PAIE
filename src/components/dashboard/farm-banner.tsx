@@ -20,6 +20,8 @@ interface FarmBannerProps {
   onOpenActivities?: () => void;
   onExportBatch: () => void;
   companySettings?: CompanySettings;
+  workerCount?: number;
+  domainCount?: number;
 }
 
 export const FarmBanner: React.FC<FarmBannerProps> = ({
@@ -29,6 +31,8 @@ export const FarmBanner: React.FC<FarmBannerProps> = ({
   onOpenActivities,
   onExportBatch,
   companySettings,
+  workerCount = 120,
+  domainCount = 4,
 }) => {
   const todayLabel = formatFullTodayFR();
   return (
@@ -72,7 +76,7 @@ export const FarmBanner: React.FC<FarmBannerProps> = ({
           </div>
 
           <p className="text-xs sm:text-sm text-emerald-100/80 leading-relaxed">
-            Suivi quotidien des présences, du travail à la tâche, des avances sur salaire et des décaissements Mobile Money (Wave, Orange Money, Espèces) pour <strong className="text-white font-semibold">120 ouvriers</strong> répartis sur 4 parcelles.
+            Suivi quotidien des présences, du travail à la tâche, des avances sur salaire et des décaissements Mobile Money (Wave, Orange Money, Espèces) pour <strong className="text-white font-semibold">{workerCount} ouvriers</strong> répartis sur {domainCount} parcelles.
           </p>
         </div>
 

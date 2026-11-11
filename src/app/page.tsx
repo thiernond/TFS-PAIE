@@ -225,6 +225,19 @@ export default function AppLayout() {
             setPayments(parsedPayments);
           }
         }
+
+        const savedAttendance = localStorage.getItem("tfs_paie_attendance_state");
+        if (savedAttendance) {
+          const parsedAttendance = JSON.parse(savedAttendance);
+          if (parsedAttendance && typeof parsedAttendance === "object") {
+            setAttendanceState(parsedAttendance);
+          }
+        }
+
+        const savedLocked = localStorage.getItem("tfs_paie_attendance_locked");
+        if (savedLocked !== null) {
+          setIsAttendanceLocked(savedLocked === "true");
+        }
       } catch (e) {
         console.error("Erreur de chargement localStorage:", e);
       }
@@ -233,8 +246,20 @@ export default function AppLayout() {
     // 2. Synchroniser les données réelles de Supabase en arrière-plan
     initSupabaseData();
 
+    // 3. Écouter les événements réseau du navigateur (Online / Offline)
+    const handleOnline = () => setIsSupabaseConnected(true);
+    const handleOffline = () => setIsSupabaseConnected(false);
+    if (typeof window !== "undefined") {
+      window.addEventListener("online", handleOnline);
+      window.addEventListener("offline", handleOffline);
+    }
+
     return () => {
       isMounted = false;
+      if (typeof window !== "undefined") {
+        window.removeEventListener("online", handleOnline);
+        window.removeEventListener("offline", handleOffline);
+      }
     };
   }, []);
 
@@ -287,7 +312,8 @@ export default function AppLayout() {
 
   // Actions Paiements (Connecté à Supabase + Cache Local)
   const handleAddPayment = async (newPayment: DailyPaymentRecord) => {
-    const isExisting = payments.some((p) => p.id === newPayment.id);
+    const existingPayment = payments.find((p) => p.id === newPayment.id);
+    const isExisting = Boolean(existingPayment);
 
     setPayments((prev) => {
       const next = isExisting
@@ -301,7 +327,15 @@ export default function AppLayout() {
       return next;
     });
 
-    if (isExisting) {
+    if (isExisting && existingPayment) {
+      const delta = newPayment.amount - existingPayment.amount;
+      if (delta !== 0) {
+        setKpis((prev) => ({
+          ...prev,
+          totalPaidThisMonth: Math.max(0, prev.totalPaidThisMonth + delta),
+          totalLaborCostPeriod: Math.max(0, prev.totalLaborCostPeriod + delta),
+        }));
+      }
       showToast(`Règlement de ${newPayment.workerName} (${formatFCFA(newPayment.amount)}) mis à jour !`);
       return;
     }
@@ -338,6 +372,7 @@ export default function AppLayout() {
         const res = await recordPaymentAction({
           workerId: newPayment.workerId,
           amount: newPayment.amount,
+          advanceDeducted: newPayment.advanceDeducted || 0,
           paymentMethod: newPayment.paymentMethod,
           transactionRef: newPayment.transactionRef,
           periodStart: newPayment.periodStart,
@@ -761,10 +796,15 @@ export default function AppLayout() {
     }
   };
 
-  // Pointage (taux 2 500 FCFA/j)
+  // Pointage (taux 2 500 FCFA/j ou taux personnalisé par journalier)
   const handleUpdateSingleAttendance = (workerId: string, status: AttendanceType) => {
     setAttendanceState((prev) => {
       const next = { ...prev, [workerId]: status };
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("tfs_paie_attendance_state", JSON.stringify(next));
+        } catch (e) { }
+      }
       const present = Object.values(next).filter((s) => s === "full_day").length;
       const half = Object.values(next).filter((s) => s === "half_day").length;
       const absent = Object.values(next).filter((s) => s === "absent").length;
@@ -781,6 +821,11 @@ export default function AppLayout() {
   const handleBatchUpdateAttendance = (updates: Record<string, AttendanceType>) => {
     setAttendanceState((prev) => {
       const next = { ...prev, ...updates };
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("tfs_paie_attendance_state", JSON.stringify(next));
+        } catch (e) { }
+      }
       const present = Object.values(next).filter((s) => s === "full_day").length;
       const half = Object.values(next).filter((s) => s === "half_day").length;
       const absent = Object.values(next).filter((s) => s === "absent").length;
@@ -797,14 +842,32 @@ export default function AppLayout() {
 
   // Pointage (Connecté à Supabase via synchronisation par lots)
   const handleSaveAttendanceView = async () => {
-    const present = Object.values(attendanceState).filter((s) => s === "full_day").length;
-    const half = Object.values(attendanceState).filter((s) => s === "half_day").length;
-    const totalDayWage = present * 2500 + half * 1250;
+    let present = 0;
+    let half = 0;
+    let totalDayWage = 0;
+
+    workers.forEach((w) => {
+      const status = attendanceState[w.id] || "full_day";
+      const rate = Math.round(w.dailyRate || 2500);
+      if (status === "full_day") {
+        present++;
+        totalDayWage += rate;
+      } else if (status === "half_day") {
+        half++;
+        totalDayWage += Math.floor(rate / 2);
+      }
+    });
+
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("tfs_paie_attendance_state", JSON.stringify(attendanceState));
+      } catch (e) { }
+    }
 
     if (isSupabaseConnected) {
-      showToast(`Enregistrement du pointage en cours...`);
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       const batch = Object.entries(attendanceState)
-        .filter(([workerId]) => workerId.includes("-"))
+        .filter(([workerId]) => uuidRegex.test(workerId))
         .map(([workerId, type]) => ({
           workerId,
           type,
@@ -829,13 +892,18 @@ export default function AppLayout() {
       }
     }
 
-    showToast(`Feuille de pointage enregistrée : ${present} présents (${formatFCFA(present * 2500)}). Total : ${formatFCFA(totalDayWage)}.`);
+    showToast(`Feuille de pointage enregistrée : ${present} présents, ${half} demi-journées. Masse du jour : ${formatFCFA(totalDayWage)}.`);
   };
 
   // Verrouillage de Journée (Connecté à Supabase avec Audit Log)
   const handleToggleAttendanceLock = async () => {
     const nextLocked = !isAttendanceLocked;
     setIsAttendanceLocked(nextLocked);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("tfs_paie_attendance_locked", String(nextLocked));
+      } catch (e) { }
+    }
 
     if (isSupabaseConnected) {
       try {
@@ -934,6 +1002,8 @@ export default function AppLayout() {
                 onOpenActivities={() => setActiveView("activites")}
                 onExportBatch={handleExportPaymentsBatch}
                 companySettings={companySettings}
+                workerCount={workers.length}
+                domainCount={domains.length}
               />
 
               {/* Cartes de Synthèse KPI */}
@@ -1192,6 +1262,7 @@ export default function AppLayout() {
         }}
         teams={mockTeams}
         activities={activities}
+        domains={domains}
         onAddWorker={handleAddWorker}
         initialWorker={editingWorker}
       />

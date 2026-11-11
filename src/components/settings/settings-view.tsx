@@ -131,29 +131,54 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
   const handleProcessLogoFile = (file: File) => {
     setLogoError(null);
-    if (!file.type.startsWith("image/")) {
-      setLogoError("Format invalide : Veuillez sélectionner une image (PNG, JPG, SVG, WebP).");
+    const allowedMimeTypes = ["image/png", "image/jpeg", "image/webp", "image/svg+xml"];
+    if (!allowedMimeTypes.includes(file.type)) {
+      setLogoError("Format non autorisé : Veuillez sélectionner une image PNG, JPG, SVG ou WebP.");
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setLogoError("L'image est trop volumineuse (maximum 5 Mo autorisés).");
+    if (file.size > 1.5 * 1024 * 1024) {
+      setLogoError("L'image est trop volumineuse (maximum 1,5 Mo pour garantir la sauvegarde hors-ligne).");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target?.result as string;
-      if (dataUrl) {
-        setCompanyForm((prev) => ({
-          ...prev,
-          logoUrl: dataUrl,
-        }));
-      }
+    const loadAsDataUrl = () => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string;
+        if (dataUrl) {
+          setCompanyForm((prev) => ({
+            ...prev,
+            logoUrl: dataUrl,
+          }));
+        }
+      };
+      reader.onerror = () => {
+        setLogoError("Erreur de lecture du fichier image.");
+      };
+      reader.readAsDataURL(file);
     };
-    reader.onerror = () => {
-      setLogoError("Erreur de lecture du fichier image.");
-    };
-    reader.readAsDataURL(file);
+
+    // Sécurité anti-XSS sur les fichiers SVG (blocage de <script>, événements inline et javascript:)
+    if (file.type === "image/svg+xml") {
+      const textReader = new FileReader();
+      textReader.onload = (e) => {
+        const svgContent = String(e.target?.result || "");
+        const hasDangerousTags =
+          /<script\b|<iframe\b|<object\b|<embed\b|<foreignObject\b|on[a-z]+\s*=|javascript:/i.test(svgContent);
+        if (hasDangerousTags) {
+          setLogoError("Fichier SVG rejeté par sécurité : le fichier contient du code actif non autorisé.");
+          return;
+        }
+        loadAsDataUrl();
+      };
+      textReader.onerror = () => {
+        setLogoError("Erreur de vérification du fichier SVG.");
+      };
+      textReader.readAsText(file);
+      return;
+    }
+
+    loadAsDataUrl();
   };
 
   const handleLogoInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

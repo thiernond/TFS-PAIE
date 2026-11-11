@@ -15,7 +15,15 @@ export function downloadCsv(
 ) {
   const escapeCell = (val: string | number | null | undefined): string => {
     if (val === null || val === undefined) return '""';
-    const str = String(val).replace(/"/g, '""');
+    let str = String(val).replace(/"/g, '""');
+    // Protection anti-CSV Injection (Formules Excel / DDE : =, @, +, -, tabulation, retour chariot)
+    // On autorise les numéros de téléphone valides (+221...) et les nombres purs
+    const trimmed = str.trimStart();
+    if (/^[=@\t\r]/.test(trimmed)) {
+      str = `'${str}`;
+    } else if (/^[+-]/.test(trimmed) && !/^\+?[0-9\s()-]{6,22}$/.test(trimmed) && !/^[+-]?[0-9]+$/.test(trimmed)) {
+      str = `'${str}`;
+    }
     return `"${str}"`;
   };
 
@@ -348,38 +356,49 @@ export function parseWorkersCsvText(text: string): {
     return "wave";
   };
 
+  const sanitizeImportedText = (val: string, maxLen = 100): string => {
+    return (val || "")
+      .replace(/^[=@+\-\t\r]+/, "")
+      .replace(/[<>]/g, "")
+      .trim()
+      .slice(0, maxLen);
+  };
+
   const parsed: Partial<Worker>[] = [];
 
-  for (let i = 1; i < rawLines.length; i++) {
+  for (let i = 1; i < rawLines.length && parsed.length < 500; i++) {
     const cols = splitLine(rawLines[i], delimiter);
     if (cols.length < 2) continue;
 
-    let firstName = firstNameIdx >= 0 ? cols[firstNameIdx] : "";
-    let lastName = lastNameIdx >= 0 ? cols[lastNameIdx] : "";
+    let firstName = firstNameIdx >= 0 ? sanitizeImportedText(cols[firstNameIdx], 60) : "";
+    let lastName = lastNameIdx >= 0 ? sanitizeImportedText(cols[lastNameIdx], 60) : "";
 
     // Si on a une colonne Nom Complet
     if (!firstName && !lastName && fullNameIdx >= 0 && cols[fullNameIdx]) {
-      const parts = cols[fullNameIdx].split(" ");
+      const parts = sanitizeImportedText(cols[fullNameIdx], 120).split(" ");
       firstName = parts[0] || "Ouvrier";
       lastName = parts.slice(1).join(" ") || "";
     }
 
     // Fallbacks positionnels si le fichier n'a pas d'en-tête reconnu
     if (!firstName && !lastName && cols.length >= 2) {
-      firstName = cols[0];
-      lastName = cols[1];
+      firstName = sanitizeImportedText(cols[0], 60);
+      lastName = sanitizeImportedText(cols[1], 60);
     }
 
-    const phone = phoneIdx >= 0 && cols[phoneIdx] ? cols[phoneIdx] : "+221 ";
-    const functionTitle = functionIdx >= 0 && cols[functionIdx] ? cols[functionIdx] : "Journalier Polyvalent";
-    const domain = domainIdx >= 0 && cols[domainIdx] ? cols[domainIdx] : "Maraîchage";
-    const teamName = teamIdx >= 0 && cols[teamIdx] ? cols[teamIdx] : "Équipe Maraîchage";
+    const rawPhone = phoneIdx >= 0 && cols[phoneIdx] ? cols[phoneIdx].trim().slice(0, 30) : "+221 ";
+    const phone = rawPhone.replace(/[^0-9+\s()-]/g, "") || "+221 ";
+    const functionTitle = functionIdx >= 0 && cols[functionIdx] ? sanitizeImportedText(cols[functionIdx], 80) : "Journalier Polyvalent";
+    const domain = domainIdx >= 0 && cols[domainIdx] ? sanitizeImportedText(cols[domainIdx], 80) : "Maraîchage";
+    const teamName = teamIdx >= 0 && cols[teamIdx] ? sanitizeImportedText(cols[teamIdx], 80) : "Équipe Maraîchage";
     const operatorStr = operatorIdx >= 0 ? cols[operatorIdx] : "wave";
     const momoOperator = normalizeOperator(operatorStr);
-    const momoNumber = momoNumberIdx >= 0 && cols[momoNumberIdx] ? cols[momoNumberIdx] : phone;
+    const rawMomo = momoNumberIdx >= 0 && cols[momoNumberIdx] ? cols[momoNumberIdx].trim().slice(0, 30) : phone;
+    const momoNumber = rawMomo.replace(/[^0-9+\s()-]/g, "") || phone;
     const rawRate = dailyRateIdx >= 0 ? cols[dailyRateIdx] : "2500";
-    const dailyRate = parseInt(rawRate.replace(/[^0-9]/g, ""), 10) || 2500;
-    const id = idIdx >= 0 && cols[idIdx] ? cols[idIdx] : undefined;
+    const parsedRate = parseInt(rawRate.replace(/[^0-9]/g, ""), 10) || 2500;
+    const dailyRate = Math.min(500000, Math.max(500, parsedRate));
+    const id = idIdx >= 0 && cols[idIdx] ? sanitizeImportedText(cols[idIdx], 40) : undefined;
 
     parsed.push({
       id,

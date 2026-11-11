@@ -2,13 +2,14 @@
 
 import React, { useState } from "react";
 import { X, UserPlus, Check, Briefcase, Layers } from "lucide-react";
-import { Worker, PaymentMethod, Team, Activity } from "@/types/payroll";
+import { Worker, PaymentMethod, Team, Activity, FarmDomain } from "@/types/payroll";
 
 interface NewWorkerModalProps {
   isOpen: boolean;
   onClose: () => void;
   teams: Team[];
   activities: Activity[];
+  domains?: FarmDomain[];
   onAddWorker: (worker: Worker) => void;
   initialWorker?: Worker | null;
 }
@@ -18,6 +19,7 @@ export const NewWorkerModal: React.FC<NewWorkerModalProps> = ({
   onClose,
   teams,
   activities,
+  domains,
   onAddWorker,
   initialWorker,
 }) => {
@@ -57,13 +59,16 @@ export const NewWorkerModal: React.FC<NewWorkerModalProps> = ({
 
   if (!isOpen) return null;
 
-  const domainsList = [
-    "Maraîchage",
-    "Vergers & Manguiers",
-    "Grandes Cultures",
-    "Élevage & Bassins",
-    "Général / Transversal",
-  ];
+  const domainsList =
+    domains && domains.length > 0
+      ? domains.map((d) => d.name)
+      : [
+          "Maraîchage",
+          "Vergers & Manguiers",
+          "Grandes Cultures",
+          "Élevage & Bassins",
+          "Général / Transversal",
+        ];
 
   const suggestedFunctions = [
     "Récolteur & Triage",
@@ -95,7 +100,7 @@ export const NewWorkerModal: React.FC<NewWorkerModalProps> = ({
       domain,
       momoOperator,
       momoNumber: momoNumber.trim() || phone.trim(),
-      dailyRate: parseInt(dailyRate, 10) || 2500,
+      dailyRate: Math.min(500000, Math.max(500, parseInt(dailyRate, 10) || 2500)),
       status: initialWorker?.status || "active",
       hiredAt: initialWorker?.hiredAt || new Date().toISOString().split("T")[0],
       unpaidAdvances: initialWorker?.unpaidAdvances || 0,
@@ -229,6 +234,8 @@ export const NewWorkerModal: React.FC<NewWorkerModalProps> = ({
                 <div className="relative">
                   <input
                     type="number"
+                    min="500"
+                    max="500000"
                     step="100"
                     value={dailyRate}
                     onChange={(e) => setDailyRate(e.target.value)}
